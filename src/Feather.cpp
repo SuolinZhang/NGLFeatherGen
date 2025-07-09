@@ -24,7 +24,6 @@ void Feather::GenerateRachis(const ngl::Vec3& p0, const ngl::Vec3& p1, const ngl
     m_rachis->addPoint(p2);
     m_rachis->addPoint(p3);
     m_rachis->setLOD(m_sample);
-    m_rachis->createVAO();
 }
 
 void Feather::generateRachis() const

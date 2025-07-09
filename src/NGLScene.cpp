@@ -91,9 +91,7 @@ void NGLScene::paintGL()
 
   ngl::ShaderLib::use("nglColourShader");
   ngl::ShaderLib::setUniform("Colour", 1.0f, 1.0f, 1.0f, 1.0f);
-  
-  m_feather->drawRachis();
-  /*
+
   // Draw based on current mode
   switch (m_drawMode)
   {
@@ -112,7 +110,6 @@ void NGLScene::paintGL()
       m_feather->draw();
       break;
   }
-  */
 
 }
 

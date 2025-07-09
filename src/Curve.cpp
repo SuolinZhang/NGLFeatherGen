@@ -153,10 +153,10 @@ void BezierCurve::drawHull()const noexcept
 
 void BezierCurve::draw()  noexcept
 {
-	// createVAO();
-m_vaoCurve->bind();
-m_vaoCurve->draw();
-m_vaoCurve->unbind();
+	createVAO();
+	m_vaoCurve->bind();
+	m_vaoCurve->draw();
+	m_vaoCurve->unbind();
 }
 
 
