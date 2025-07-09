@@ -30,7 +30,7 @@ public :
 	/// @brief destructor
 	~BezierCurve() noexcept;
 	/// @brief Draw method to draw the curve 
-		void draw() const noexcept;
+		void draw() noexcept;
 	/// @brief draw the control points
 	void drawControlPoints() const noexcept;
 	/// @brief Draw the control hull
@@ -68,6 +68,8 @@ public :
   	void createVAO() noexcept;
 	///	@brief get all samples of drawing the curve and reset m_samplePts variable
 	std::vector<ngl::Vec3> getSamplePoints() noexcept;
+	/// @brief Get the control points of the curve
+	std::vector<ngl::Vec3> getCPs() const { return m_cp; }
 
 
 protected :

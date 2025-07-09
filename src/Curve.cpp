@@ -135,7 +135,6 @@ void BezierCurve::createVAO() noexcept
 
 void BezierCurve::drawControlPoints()const noexcept
 {
-
   m_vaoPoints->bind();
   m_vaoPoints->setMode(GL_POINTS);
   m_vaoPoints->draw();
@@ -152,8 +151,9 @@ void BezierCurve::drawHull()const noexcept
  }
 
 
-void BezierCurve::draw() const noexcept
+void BezierCurve::draw()  noexcept
 {
+	// createVAO();
 m_vaoCurve->bind();
 m_vaoCurve->draw();
 m_vaoCurve->unbind();

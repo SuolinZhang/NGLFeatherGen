@@ -9,8 +9,16 @@ void Feather::setSampleNum(const int _num) noexcept
     m_sample = _num;
 }
 
+void Feather::ensureRachisExists() const
+{
+    if (!m_rachis) {
+        m_rachis = std::make_unique<BezierCurve>();
+    }
+}
+
 void Feather::GenerateRachis(const ngl::Vec3& p0, const ngl::Vec3& p1, const ngl::Vec3& p2, const ngl::Vec3& p3) const
 {
+    ensureRachisExists();
     m_rachis->addPoint(p0);
     m_rachis->addPoint(p1);
     m_rachis->addPoint(p2);
@@ -34,8 +42,13 @@ void Feather::setRachisControlPoints(const ngl::Vec3& p0, const ngl::Vec3& p1,
     m_rachisP3 = p3;
 
     // Clear existing rachis and regenerate
-    m_rachis = std::make_unique<BezierCurve>();
+    m_rachis.reset();
     generateRachis();
+}
+
+std::vector<ngl::Vec3> Feather::getRachisControlPoints() const
+{
+    return {m_rachisP0, m_rachisP1, m_rachisP2, m_rachisP3};
 }
 
 void Feather::generateCurves() const
@@ -43,9 +56,19 @@ void Feather::generateCurves() const
     generateRachis();
 }
 
+void Feather::drawRachis() const
+{
+    ensureRachisExists();
+    if (m_rachis) {
+        m_rachis->draw();
+        m_rachis->drawControlPoints();
+        m_rachis->drawHull();
+    }
+}
+
 void Feather::draw() const
 {
-    m_rachis->draw();
+    drawRachis();
 }
 
 

@@ -8,12 +8,24 @@ File description is kept same as of initial file.
 #include "Curve.h"
 #include <ngl/Text.h>
 #include "WindowParams.h"
-#include <QOpenGLWindow>
 #include <memory>
 #include "Feather.h"
+#include <QOpenGLWidget>
+
+//----------------------------------------------------------------------------------------------------------------------
+/// @brief Enum for different draw modes
+//----------------------------------------------------------------------------------------------------------------------
+enum class DrawMode
+{
+    RACHIS_ONLY,
+    OUTLINES_ONLY,
+    BARBS_ONLY,
+    ALL_COMPONENTS
+};
+
 //----------------------------------------------------------------------------------------------------------------------
 /// @file NGLScene.h
-/// @brief this class inherits from the Qt OpenGLWindow and allows us to use NGL to draw OpenGL
+/// @brief this class inherits from the Qt OpenGLWidget and allows us to use NGL to draw OpenGL
 /// @author Jonathan Macey
 /// @version 1.0
 /// @date 10/9/13
@@ -24,14 +36,14 @@ File description is kept same as of initial file.
 /// put in this file
 //----------------------------------------------------------------------------------------------------------------------
 
-class NGLScene : public QOpenGLWindow
+class NGLScene : public QOpenGLWidget
 {
   public:
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief ctor for our NGL drawing class
     /// @param [in] parent the parent window to the class
     //----------------------------------------------------------------------------------------------------------------------
-    NGLScene();
+    NGLScene(QWidget *parent = nullptr);
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief dtor must close down ngl and release OpenGL resources
     //----------------------------------------------------------------------------------------------------------------------
@@ -40,15 +52,26 @@ class NGLScene : public QOpenGLWindow
     /// @brief the initialize class is called once when the window is created and we have a valid GL context
     /// use this to setup any default GL stuff
     //----------------------------------------------------------------------------------------------------------------------
-    void initializeGL();
+    void initializeGL() override;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief this is called everytime we want to draw the scene
     //----------------------------------------------------------------------------------------------------------------------
-    void paintGL();
+    void paintGL() override;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief this is called everytime we resize
     //----------------------------------------------------------------------------------------------------------------------
-    void resizeGL(int _w, int _h);
+    void resizeGL(int _w, int _h) override;
+    
+    //----------------------------------------------------------------------------------------------------------------------
+    /// @brief Get the Feather object for UI control
+    //----------------------------------------------------------------------------------------------------------------------
+    Feather* getFeather() { return m_feather.get(); }
+    
+    //----------------------------------------------------------------------------------------------------------------------
+    /// @brief Set the current draw mode
+    //----------------------------------------------------------------------------------------------------------------------
+    void setDrawMode(DrawMode mode) { m_drawMode = mode; }
+    
 
 private:
     //----------------------------------------------------------------------------------------------------------------------
@@ -73,6 +96,10 @@ private:
     //----------------------------------------------------------------------------------------------------------------------
     std::unique_ptr<BezierCurve> m_curve;
     std::unique_ptr<Feather> m_feather;
+    //----------------------------------------------------------------------------------------------------------------------
+    /// @brief current draw mode
+    //----------------------------------------------------------------------------------------------------------------------
+    DrawMode m_drawMode = DrawMode::RACHIS_ONLY;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief method to load transform matrices to the shader
     //----------------------------------------------------------------------------------------------------------------------

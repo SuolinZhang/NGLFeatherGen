@@ -45,6 +45,7 @@ public:
     ngl::Vec3 getStartPoint(ngl::Real _t);
     
     /// @brief Draw the complete feather (rachis, outlines, all barbs)
+    void drawRachis() const;
     void draw() const;
     
     // ===== UI Control Methods =====
@@ -55,9 +56,6 @@ public:
     /// @param p3 End point
     void setRachisControlPoints(const ngl::Vec3& p0, const ngl::Vec3& p1, 
                                const ngl::Vec3& p2, const ngl::Vec3& p3);
-    
-    /// @brief Update rachis curve with current control points
-    void updateRachis();
     
     /// @brief Get current rachis control points
     /// @return Vector of 4 control points [p0, p1, p2, p3]
@@ -75,14 +73,14 @@ public:
         /// @param d distance from the first cp to the end cp of a barb
         std::vector<std::unique_ptr<BezierCurve>> GenerateBarbs(ngl::Real k, ngl::Real q, ngl::Real d) const;
     */
+    /// ====================Core Curve Components===================
+    mutable std::unique_ptr<BezierCurve> m_rachis;
+    mutable std::unique_ptr<BezierCurve> m_leftOutline;
+    mutable std::unique_ptr<BezierCurve> m_rightOutline;
+    mutable std::unique_ptr<BezierCurve> m_leftBarb;
+    mutable std::unique_ptr<BezierCurve> m_rightBarb;
 
 private:
-    /// ====================Core Curve Components===================
-    std::unique_ptr<BezierCurve> m_rachis=std::make_unique<BezierCurve>();
-    std::unique_ptr<BezierCurve> m_leftOutline=std::make_unique<BezierCurve>();
-    std::unique_ptr<BezierCurve> m_rightOutline=std::make_unique<BezierCurve>();
-    std::unique_ptr<BezierCurve> m_leftBarb=std::make_unique<BezierCurve>();
-    std::unique_ptr<BezierCurve> m_rightBarb=std::make_unique<BezierCurve>();
     
     /// ====================Feather Parameters===================
     /// @brief the LOD of rachies curve, number of barbs
@@ -100,6 +98,10 @@ private:
 
     ngl::Vec3 l_barb_endP;
     ngl::Vec3 r_barb_endP;
+    
+    /// ====================Helper Methods===================
+    /// @brief Ensure rachis curve exists
+    void ensureRachisExists() const;
 };
 
 #endif

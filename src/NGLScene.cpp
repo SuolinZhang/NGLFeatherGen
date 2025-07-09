@@ -8,9 +8,9 @@
 #include <iostream>
 #include "Feather.h"
 
-NGLScene::NGLScene()
+NGLScene::NGLScene(QWidget *parent)
+  : QOpenGLWidget(parent)
 {
-  setTitle("Feather Generator");
 }
 
 NGLScene::~NGLScene()
@@ -50,20 +50,19 @@ void NGLScene::initializeGL()
   ngl::ShaderLib::use(ngl::nglColourShader);
   ngl::ShaderLib::setUniform("Colour", 1.0f, 1.0f, 1.0f, 1.0f);
 
+  // Create the feather object
   m_feather = std::make_unique<Feather>();
-  // m_feather->setRightBarbEndP(ngl::Vec3(1.5, 3.5, 0));
-  // m_feather->setLeftBarbEndP(ngl::Vec3(-1.5, 3.5, 0));
-  m_feather->generateCurves();
+  
+  // Initialize with default rachis values after OpenGL context is ready
+  m_feather->setSampleNum(200);
+  m_feather->setRachisControlPoints(
+    ngl::Vec3(0.0f, 0.0f, 0.0f),  // P0
+    ngl::Vec3(0.3f, 2.0f, 0.0f),  // P1
+    ngl::Vec3(0.5f, 4.0f, 0.0f),  // P2
+    ngl::Vec3(0.2f, 6.0f, 0.0f)   // P3
+  );
+  
 
-
-
-  // m_curve = std::make_unique<BezierCurve>();
-  // m_curve->addPoint(ngl::Vec3(-5.0f, 0.0f, -5.0f));
-  // m_curve->addPoint(ngl::Vec3(-2.0f, 2.0f, 1.0f));
-  // m_curve->addPoint(ngl::Vec3(3.0f, -3.0f, -3.0f));
-  // m_curve->addPoint(ngl::Vec3(2.0f, -6.0f, 2.0f));
-  // m_curve->setLOD(200.0f);
-  // m_curve->createVAO();
 }
 
 void NGLScene::loadMatricesToShader()
@@ -92,17 +91,29 @@ void NGLScene::paintGL()
 
   ngl::ShaderLib::use("nglColourShader");
   ngl::ShaderLib::setUniform("Colour", 1.0f, 1.0f, 1.0f, 1.0f);
-  m_feather->draw();
-  // ngl::ShaderLib::setUniform("Colour", 1.0f, 1.0f, 1.0f, 1.0f);
-  // m_curve->draw();
-  // glPointSize(4);
-  // ngl::ShaderLib::setUniform("Colour", 0.0f, 1.0f, 0.0f, 1.0f);
-  //
-  // m_curve->drawControlPoints();
-  // glPointSize(1);
-  // ngl::ShaderLib::setUniform("Colour", 1.0f, 0.0f, 0.0f, 1.0f);
-  //
-  // m_curve->drawHull();
+  
+  m_feather->drawRachis();
+  /*
+  // Draw based on current mode
+  switch (m_drawMode)
+  {
+    case DrawMode::RACHIS_ONLY:
+      m_feather->drawRachis();
+      break;
+    case DrawMode::OUTLINES_ONLY:
+      // TODO: Add drawOutlines() method to Feather
+      m_feather->drawRachis(); // For now, just draw rachis
+      break;
+    case DrawMode::BARBS_ONLY:
+      // TODO: Add drawBarbs() method to Feather
+      m_feather->drawRachis(); // For now, just draw rachis
+      break;
+    case DrawMode::ALL_COMPONENTS:
+      m_feather->draw();
+      break;
+  }
+  */
+
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -230,3 +241,5 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
   }
   update();
 }
+
+
