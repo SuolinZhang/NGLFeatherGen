@@ -135,10 +135,16 @@ void BezierCurve::createVAO() noexcept
 
 void BezierCurve::drawControlPoints()const noexcept
 {
+  // Set color to red for control points
+  ngl::ShaderLib::setUniform("Colour", 1.0f, 0.0f, 0.0f, 1.0f);
+  
   m_vaoPoints->bind();
   m_vaoPoints->setMode(GL_POINTS);
   m_vaoPoints->draw();
   m_vaoPoints->unbind();
+  
+  // Reset color to white
+  ngl::ShaderLib::setUniform("Colour", 1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 
@@ -153,7 +159,6 @@ void BezierCurve::drawHull()const noexcept
 
 void BezierCurve::draw()  noexcept
 {
-	createVAO();
 	m_vaoCurve->bind();
 	m_vaoCurve->draw();
 	m_vaoCurve->unbind();

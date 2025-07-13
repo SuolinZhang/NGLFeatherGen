@@ -1,6 +1,6 @@
 #include <QMouseEvent>
 #include <QGuiApplication>
-
+#include <iostream>
 #include "NGLScene.h"
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
@@ -20,7 +20,7 @@ NGLScene::~NGLScene()
 
 void NGLScene::resizeGL(int _w, int _h)
 {
-  m_project = ngl::perspective(45.0f, static_cast<float>(_w) / _h, 0.05f, 350.0f);
+  m_project = ngl::perspective(45.0f, static_cast<float>(_w) / _h, 0.01f, 1000.0f);
   m_win.width = static_cast<int>(_w * devicePixelRatio());
   m_win.height = static_cast<int>(_h * devicePixelRatio());
 }
@@ -40,29 +40,18 @@ void NGLScene::initializeGL()
   // This is a static camera so it only needs to be set once
   // First create Values for the camera position
   ngl::Vec3 from(0.0f, 5.0f, 15.0f);
-  ngl::Vec3 to(0.0f, 2.5f, 0.0f);
+  ngl::Vec3 to(0.0f, 4.75f, 0.0f);
   ngl::Vec3 up(0.0f, 1.0f, 0.0f);
   m_view = ngl::lookAt(from, to, up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_project = ngl::perspective(45.0f, 720.0f / 576.0f, 0.5f, 150.0f);
+  m_project = ngl::perspective(45.0f, 720.0f / 576.0f, 0.01f, 10000.0f);
 
   ngl::ShaderLib::use(ngl::nglColourShader);
   ngl::ShaderLib::setUniform("Colour", 1.0f, 1.0f, 1.0f, 1.0f);
 
   // Create the feather object
   m_feather = std::make_unique<Feather>();
-  
-  // Initialize with default rachis values after OpenGL context is ready
-  m_feather->setSampleNum(200);
-  m_feather->setRachisControlPoints(
-    ngl::Vec3(0.0f, 0.0f, 0.0f),  // P0
-    ngl::Vec3(0.3f, 2.0f, 0.0f),  // P1
-    ngl::Vec3(0.5f, 4.0f, 0.0f),  // P2
-    ngl::Vec3(0.2f, 6.0f, 0.0f)   // P3
-  );
-  
-
 }
 
 void NGLScene::loadMatricesToShader()
@@ -92,19 +81,30 @@ void NGLScene::paintGL()
   ngl::ShaderLib::use("nglColourShader");
   ngl::ShaderLib::setUniform("Colour", 1.0f, 1.0f, 1.0f, 1.0f);
 
+  /*
+  auto cps = m_feather->getRachisControlPoints();
+  std::cout << cps.size() << "\n";
+  for(auto & cp : cps)
+  {
+    std::cout << "(" << cp.m_x << "," << cp.m_y << "," << cp.m_z << ")"<< "\n";
+  }
+  */
+
+  m_feather->update();
   // Draw based on current mode
   switch (m_drawMode)
   {
-    case DrawMode::RACHIS_ONLY:
+    case DrawMode::RACHIS:
       m_feather->drawRachis();
       break;
-    case DrawMode::OUTLINES_ONLY:
-      // TODO: Add drawOutlines() method to Feather
-      m_feather->drawRachis(); // For now, just draw rachis
+    case DrawMode::OUTLINES:
+      m_feather->drawRachis();
+      m_feather->drawOutlines();
       break;
-    case DrawMode::BARBS_ONLY:
-      // TODO: Add drawBarbs() method to Feather
-      m_feather->drawRachis(); // For now, just draw rachis
+    case DrawMode::BARB:
+      m_feather->drawRachis();
+      m_feather->drawOutlines();
+      m_feather->drawBarb();
       break;
     case DrawMode::ALL_COMPONENTS:
       m_feather->draw();
@@ -133,7 +133,6 @@ void NGLScene::mouseMoveEvent(QMouseEvent *_event)
     m_win.spinYFace += static_cast<int>(0.5f * diffx);
     m_win.origX = position.x();
     m_win.origY = position.y();
-    update();
   }
   // right mouse translate code
   else if (m_win.translate && _event->buttons() == Qt::RightButton)
@@ -144,8 +143,8 @@ void NGLScene::mouseMoveEvent(QMouseEvent *_event)
     m_win.origYPos = position.y();
     m_modelPos.m_x += INCREMENT * diffX;
     m_modelPos.m_y -= INCREMENT * diffY;
-    update();
   }
+  update();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -172,6 +171,7 @@ void NGLScene::mousePressEvent(QMouseEvent *_event)
     m_win.origYPos = position.y();
     m_win.translate = true;
   }
+  update();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -188,6 +188,7 @@ void NGLScene::mouseReleaseEvent(QMouseEvent *_event)
   {
     m_win.translate = false;
   }
+  update();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -207,36 +208,6 @@ void NGLScene::wheelEvent(QWheelEvent *_event)
 }
 //----------------------------------------------------------------------------------------------------------------------
 
-void NGLScene::keyPressEvent(QKeyEvent *_event)
-{
-  // this method is called every time the main window recives a key event.
-  // we then switch on the key value and set the camera in the GLWindow
-  switch (_event->key())
-  {
-  // escape key to quite
-  case Qt::Key_Escape:
-    QGuiApplication::exit(EXIT_SUCCESS);
-    break;
-  // turn on wirframe rendering
-  case Qt::Key_W:
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    break;
-  // turn off wire frame
-  case Qt::Key_S:
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    break;
-  // show full screen
-  case Qt::Key_F:
-    showFullScreen();
-    break;
-  // show windowed
-  case Qt::Key_N:
-    showNormal();
-    break;
-  default:
-    break;
-  }
-  update();
-}
+
 
 

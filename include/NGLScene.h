@@ -17,9 +17,9 @@ File description is kept same as of initial file.
 //----------------------------------------------------------------------------------------------------------------------
 enum class DrawMode
 {
-    RACHIS_ONLY,
-    OUTLINES_ONLY,
-    BARBS_ONLY,
+    RACHIS,
+    OUTLINES,
+    BARB,
     ALL_COMPONENTS
 };
 
@@ -49,8 +49,8 @@ class NGLScene : public QOpenGLWidget
     //----------------------------------------------------------------------------------------------------------------------
     ~NGLScene();
     //----------------------------------------------------------------------------------------------------------------------
-    /// @brief the initialize class is called once when the window is created and we have a valid GL context
-    /// use this to setup any default GL stuff
+    /// @brief the initialize class is called once when the window is created thus we have a valid GL context
+    /// use this to set up any default GL stuff
     //----------------------------------------------------------------------------------------------------------------------
     void initializeGL() override;
     //----------------------------------------------------------------------------------------------------------------------
@@ -99,16 +99,11 @@ private:
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief current draw mode
     //----------------------------------------------------------------------------------------------------------------------
-    DrawMode m_drawMode = DrawMode::RACHIS_ONLY;
+    DrawMode m_drawMode = DrawMode::RACHIS;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief method to load transform matrices to the shader
     //----------------------------------------------------------------------------------------------------------------------
     void loadMatricesToShader();
-     //----------------------------------------------------------------------------------------------------------------------
-    /// @brief Qt Event called when a key is pressed
-    /// @param [in] _event the Qt event to query for size etc
-    //----------------------------------------------------------------------------------------------------------------------
-    void keyPressEvent(QKeyEvent *_event);
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief this method is called every time a mouse is moved
     /// @param _event the Qt Event structure

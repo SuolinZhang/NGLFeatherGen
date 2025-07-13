@@ -25,9 +25,15 @@ private slots:
     
     // Slot for tab changes
     void onTabChanged(int index);
+    
+    // Slot for outline controls
+    void onSymmetricalChanged(bool checked);
 
 private:
     void updateRachis();
+    void updateOutlines();
+    void updateBarbs();
+    void updateAllFeather();
     void setupConnections();
     
     Ui::MainWindow *ui;

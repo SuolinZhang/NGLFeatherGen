@@ -23,14 +23,21 @@ find_package(OpenMP)
 find_package(OpenImageIO CONFIG)
 # Instruct CMake to run moc automatically when needed (Qt projects only)
 set(CMAKE_AUTOMOC ON)
-# find Qt libs first we check for Version 6
-find_package(Qt6 COMPONENTS OpenGL Widgets QUIET )
-if ( Qt6_FOUND )
-    message("Found Qt6 Using that")
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${PROJECT_SOURCE_DIR}/ui)
+
+# run rcc if required
+set(CMAKE_AUTORCC ON)
+
+# find Qt we can use either Qt6 or Qt5
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets OpenGLWidgets)
+if (Qt6_FOUND)
+    find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets OpenGLWidgets)
 else()
-    message("Found Qt5 Using that")
-    find_package(Qt5 COMPONENTS OpenGL Widgets REQUIRED)
+    find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 endif()
+
 # use C++ 17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -38,6 +45,7 @@ set(CMAKE_CXX_EXTENSIONS ON)
 # Set the name of the executable we want to build
 add_executable(${TargetName})
 
+set(UI_FILES ${PROJECT_SOURCE_DIR}/ui/mainwindow.ui)
 # Add NGL include path
 include_directories(include $ENV{HOME}/NGL/include)
 target_sources(${TargetName} PRIVATE ${PROJECT_SOURCE_DIR}/src/main.cpp  
@@ -47,7 +55,28 @@ target_sources(${TargetName} PRIVATE ${PROJECT_SOURCE_DIR}/src/main.cpp
             ${PROJECT_SOURCE_DIR}/include/Curve.h
             ${PROJECT_SOURCE_DIR}/include/Feather.h
             ${PROJECT_SOURCE_DIR}/src/Feather.cpp
+            ${PROJECT_SOURCE_DIR}/src/mainwindow.cpp
+            ${PROJECT_SOURCE_DIR}/include/mainwindow.h
+            ${UI_FILES}
 )
 
-# now add NGL specific values
-target_link_libraries(${TargetName} PRIVATE  NGL Qt::Widgets Qt::OpenGL)
+target_link_libraries(${TargetName} PRIVATE  NGL Qt${QT_VERSION_MAJOR}::Widgets)
+
+if (Qt6_FOUND)
+    target_link_libraries(${TargetName} PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
+endif()
+#################################################################################
+# Testing code
+#################################################################################
+find_package(GTest CONFIG REQUIRED)
+include(GoogleTest)
+enable_testing()
+add_executable(FeatherTests)
+target_sources(FeatherTests PRIVATE tests/FeatherTest.cpp
+        src/Curve.cpp src/Feather.cpp include/Curve.h include/Feather.h
+)
+target_link_libraries(FeatherTests PRIVATE GTest::gtest GTest::gtest_main NGL Qt${QT_VERSION_MAJOR}::Widgets)
+if (Qt6_FOUND)
+    target_link_libraries(FeatherTests PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
+endif()
+gtest_discover_tests(FeatherTests)
