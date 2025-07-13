@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include "Curve.h"
+#include <algorithm>
 
 /**
  * @brief Feather class for generating procedural feather geometry
